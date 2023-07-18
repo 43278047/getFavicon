@@ -122,7 +122,7 @@ class Favicon
          */
         $time_start = microtime(TRUE);
 
-        $this->_log_message('Begin to get icon, ' . $url);
+        $this->_log_message('【start】get url, ' . $url);
 
 
         /**
@@ -139,7 +139,7 @@ class Favicon
 
         $this->_last_memory_usage = ((!function_exists('memory_get_usage')) ? '0' : round(memory_get_usage() / 1024 / 1024, 2)) . 'MB';
 
-        $this->_log_message('Get icon complate, spent time ' . $this->_last_time_spend . 's, Memory_usage ' . $this->_last_memory_usage);
+        $this->_log_message('【endInfo】time ' . $this->_last_time_spend . ' Memory_usage ' . $this->_last_memory_usage);
 
         /**
          * 设置输出Header信息
@@ -321,10 +321,38 @@ class Favicon
         //    } 
         //}
         
+        /**
+         * 从其他api最后获取图像 -----------------------------------------------------
+         * 
+         */
+        
+        if ($this->data == NULL) {
+    $this->_log_message("【API-1】url: {$this->full_host}");
+
+    $parsed_url = parse_url($this->full_host);
+
+    if (isset($parsed_url['host'])) {
+        // $this->_log_message("从其他api最后获取图像host: {$parsed_url['host']}");
+        $thrurl = str_replace(array('http://', 'https://'), '', $parsed_url['host']) . '.png';
+        $this->_log_message("【API-1】host: {$thrurl}");
+
+        $icon = file_get_contents('https://api.iowen.cn/favicon/' . $thrurl);
+        // $this->_log_message("--图标 md5 值为" . md5($icon));
+        if ($icon && md5($icon) != "05231fb6b69aff47c3f35efe09c11ba0") {
+            $this->_log_message("【API-1号】success: {$thrurl} ");
+            $this->data = $icon;
+        }else{
+            $this->_log_message("【API-1号】error: {$thrurl} ");
+        }
+    }
+}
+        
+        
+        
 
         if ($this->data == NULL) {
             //各个方法都试过了，还是获取不到。。。
-            $this->_log_message("Cannot get icon from {$this->params['origin_url']}");
+            $this->_log_message("【end】default img {$this->params['origin_url']}");
 
             return FALSE;
         }
@@ -511,7 +539,7 @@ class Favicon
 
             return $arr;
         }else{
-            $this->_log_message("不是图片：{$url}");
+            $this->_log_message("【img】not img：{$url}");
             return $arr;
         }
     }
